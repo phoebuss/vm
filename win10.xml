@@ -1,0 +1,73 @@
+<domain type='kvm'>
+    <name>Windows10</name>
+    <uuid>ad0bc427-17f2-42ce-b424-cb0b9b859366</uuid>
+
+    <!-- CPU: host passthrough: 4 vCPU, 2 cores, 2 threads/core -->
+    <vcpu>4</vcpu>
+    <cpu mode="host-passthrough">
+        <topology sockets="1" cores="2" threads="2"/>
+    </cpu>
+
+    <!-- Memory: 8GB -->
+    <memory unit='GiB'>8</memory>
+    <currentMemory unit='GiB'>8</currentMemory>
+
+    <!-- Mainboard: x86_64 OVMF UEFI -->
+    <os>
+        <type arch="x86_64" machine="q35">hvm</type>
+        <loader type="pflash" readonly="yes">/usr/share/OVMF/OVMF_CODE.fd</loader>
+        <nvram>/home/puppy/vm/OVMF_WIN10.fd</nvram>
+        <bootmenu enable="yes" />
+    </os>
+
+    <devices>
+        <emulator>/usr/bin/kvm-spice</emulator>
+
+        <!-- Viewing Window: SPICE -->
+        <graphics type="spice" autoport="yes"/>
+
+        <!-- HDD SATA -->
+        <disk type='file' device='disk'>
+            <driver name='qemu' type='raw'/>
+            <source file='/home/puppy/vm/win10.img'/>
+            <target dev="sda" bus="sata"/>
+        </disk>
+
+        <!-- 00:02.0: Video card: Redhat QXL virtual GPU -->
+        <video>
+            <model type='qxl' ram='262144' vram='262144' vgamem='65536' heads='1' primary='yes'/>
+            <address type='pci' domain='0x0000' bus='0x00' slot='0x02' function='0x0'/>
+        </video>
+
+        <!-- 00:03.0: Sound card -->
+        <sound model="ac97">
+            <address type='pci' domain='0x0000' bus='0x00' slot='0x03' function='0x0'/>
+        </sound>
+
+        <!-- 00:04.0: NIC: emulated RTL8139 attached to the 'default' network -->
+        <interface type='network'>
+            <mac address='52:54:00:d7:a8:f7'/>
+            <source network='default'/>
+            <model type='rtl8139'/>
+            <address type='pci' domain='0x0000' bus='0x00' slot='0x04' function='0x0'/>
+        </interface>
+
+    </devices>
+    <features>
+        <acpi/>
+        <apic/>
+        <hyperv>
+            <relaxed state='on'/>
+            <vapic state='on'/>
+            <spinlocks state='on' retries='8191'/>
+            <vendor_id state="on" value="0123456789ab" />
+        </hyperv>
+        <kvm>
+            <hidden state="on" />
+        </kvm>
+        <vmport state='off'/>
+    </features>
+    <on_poweroff>destroy</on_poweroff>
+    <on_reboot>restart</on_reboot>
+    <on_crash>destroy</on_crash>
+</domain>
